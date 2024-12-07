@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/rhsu/aoc2024/aoc'
+relocations:     []
+...

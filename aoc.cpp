@@ -16,8 +16,17 @@ bool dfs(long long target, vector<int>& v, int i, long long sum) {
         }
         return false;
     }
+    if (sum > target) {
+        return false;
+    }
+
+    // Calculate the number of digits of v[i], edge case 1, 100, 1000, 10000, ...
+    double n = log10(v[i]);
+    if(n == (int) n) n = n + 1;
+    else n = ceil(n);
+    
     return dfs(target, v, i + 1, sum + v[i]) || dfs(target, v, i + 1, sum * v[i]) ||
-           dfs(target, v, i + 1, sum * (long long)pow(10, ceil(log10(v[i]))) + (long long)v[i]);
+           dfs(target, v, i + 1, sum * (long long)pow(10, n) + (long long)v[i]);
 }
 
 int main() {
