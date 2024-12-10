@@ -2,6 +2,8 @@
     "files.associations": {
         "iostream": "cpp",
         "fstream": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "set": "cpp",
+        "vector": "cpp"
     }
 }

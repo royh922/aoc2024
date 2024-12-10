@@ -10,122 +10,76 @@
 #include <vector>
 using namespace std;
 
-int gcd(int a, int b) {
-    if (b == 0) {
-        return a;
-    }
-    return gcd(b, a % b);
-}
-
-// void populate(vector<vector<char>>& grid, vector<vector<char>>& newGrid, vector<pair<int, int>>& nodes) {
-//     for (int i = 0; i < nodes.size() - 1; i++) {
-//         for (int j = i + 1; j < nodes.size(); j++) {
-//             pair<int, int> A = nodes[i];
-//             pair<int, int> B = nodes[j];
-//             int x_dist = (B.first - A.first);
-//             int y_dist = (B.second - A.second);
-//             int xA = A.first;
-//             int yA = A.second;
-//             int xB = B.first;
-//             int yB = B.second;
-
-//             if (xA - x_dist >= 0 && xA - x_dist < grid[0].size() && yA - y_dist >= 0 && yA - y_dist < grid.size()) {
-//                 newGrid[xA - x_dist][yA - y_dist] = '#';
-//             }
-//             if (xB + x_dist >= 0 && xB + x_dist < grid[0].size() && yB + y_dist >= 0 && yB + y_dist < grid.size()) {
-//                 newGrid[xB + x_dist][yB + y_dist] = '#';
-//             }
-//         }
-//     }
-// }
-
-void populate2(vector<vector<char>>& grid, vector<vector<char>>& newGrid, vector<pair<int, int>>& nodes) {
-    for (int i = 0; i < nodes.size() - 1; i++) {
-        for (int j = i + 1; j < nodes.size(); j++) {
-            pair<int, int> A = nodes[i];
-            pair<int, int> B = nodes[j];
-            int x_dist = (B.first - A.first);
-            int y_dist = (B.second - A.second);
-            int common = gcd(abs(x_dist), abs(y_dist));
-            x_dist /= common;
-            y_dist /= common;
-            int xA = A.first;
-            int yA = A.second;
-            int xB = B.first;
-            int yB = B.second;
-
-            int newX = xA;
-            int newY = yA;
-            while (newX >= 0 && newX < grid[0].size() && newY >= 0 && newY < grid.size()) {
-                newGrid[newX][newY] = '#';
-                newX -= x_dist;
-                newY -= y_dist;
-            }
-            newX = xB;
-            newY = yB;
-            while (newX >= 0 && newX < grid[0].size() && newY >= 0 && newY < grid.size()) {
-                newGrid[newX][newY] = '#';
-                newX += x_dist;
-                newY += y_dist;
-            }
-
-            // newX = xA + x_dist;
-            // newY = yA + y_dist;
-            // while (newX >= 0 && newX < grid[0].size() && newY >= 0 && newY < grid.size()) {
-            //     newGrid[newX][newY] = '#';
-            //     newX += x_dist;
-            //     newY += y_dist;
-            // }
+int check(pair<int, int> item, vector<int>& spaces) {
+    int cnt = item.first;
+    int index = item.second;
+    for(int i = 0; i < spaces.size() && i+1 < index; i++){
+        if(spaces[i] >= cnt){
+            spaces.insert(spaces.begin() + index, cnt + spaces[index-1]);
+            spaces.erase(spaces.begin() + index - 1);
+            return i+1;
         }
     }
+    return -1;
 }
 
 int main() {
     ifstream input("data.txt");
     string line;
-    vector<vector<char>> grid;
+    vector<pair<int, int>> nums;
+    vector<int> spaces;
     while (getline(input, line)) {
-        // Populate grid
-        vector<char> row;
-        for (char c : line) {
-            row.push_back(c);
+        for (int i = 0; i < line.size(); i++) {
+            char c = line[i];
+            if(i % 2 == 0) nums.push_back({c - '0', i / 2});
+            else spaces.push_back(c - '0');
         }
-        grid.push_back(row);
     }
 
-    map<char, vector<pair<int, int>>> nodes;
+    // vector<int> times = vector<int>(spaces.size(), 0);
 
-    for (int i = 0; i < grid.size(); i++) {
-        for (int j = 0; j < grid[i].size(); j++) {
-            if (isalnum(grid[i][j])) {
-                nodes[grid[i][j]].push_back({i, j});
+    bool found = true;
+
+    while(found){
+        for(int i = 0; i < nums.size(); i++){
+            printf("%d:%d ", nums[i].first, nums[i].second);
+        }
+        cout << endl;
+
+        for(int i = 0; i < spaces.size(); i++){
+            printf("%d ", spaces[i]);
+        }
+        cout << endl;
+        found = false;
+        for(int i = nums.size()-1; i >= 0; i--){
+            int res = check(nums[i], spaces);
+            if(res != -1){
+                found = true;
+                pair<int, int> temp = nums[i];
+                nums.erase(nums.begin() + i);
+                nums.insert(nums.begin() + res, temp);
+                spaces.insert(spaces.begin() + res-1, 0);
+                spaces.erase(spaces.end()-1);
+                break;
             }
         }
     }
 
-    vector<vector<char>> newGrid = grid;
+    int index = 0;
 
-    // Populate newGrid with '.'s
-    for (int i = 0; i < grid.size(); i++) {
-        for (int j = 0; j < grid[i].size(); j++) {
-            newGrid[i][j] = '.';
+    long long cnt = 0;
+
+    for(int i = 0; i < nums.size(); i++){
+        for(int j = 0; j < nums[i].first; j++){
+            cnt += index * nums[i].second;
+            index++;
         }
-    }
-
-    for (auto& [key, value] : nodes) {
-        populate2(grid, newGrid, value);
-    }
-
-    int cnt = 0;
-    for (int i = 0; i < newGrid.size(); i++) {
-        for (int j = 0; j < newGrid[i].size(); j++) {
-            if (newGrid[i][j] == '#') {
-                cnt++;
-            }
-        }
+        index+=spaces[i];
     }
 
     cout << cnt << endl;
+
+    
 
     return 0;
 }
